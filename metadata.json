@@ -1,0 +1,6 @@
+{
+  "name": "Attendly",
+  "description": "A production-level smart attendance system with QR code and GPS verification.",
+  "requestFramePermissions": ["geolocation", "camera"],
+  "majorCapabilities": ["Real-time Data", "Geolocation", "QR Code Generation"]
+}

@@ -1,0 +1,67 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Represents an instructor or student",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["instructor", "student"] },
+        "totalLectures": { "type": "number", "description": "For students" },
+        "presentCount": { "type": "number", "description": "For students" },
+        "absentCount": { "type": "number", "description": "For students" },
+        "lateCount": { "type": "number", "description": "For students" }
+      },
+      "required": ["uid", "name", "role"]
+    },
+    "Lecture": {
+      "title": "Lecture",
+      "description": "A scheduled class session",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "instructorId": { "type": "string" },
+        "instructorName": { "type": "string" },
+        "latitude": { "type": "number" },
+        "longitude": { "type": "number" },
+        "radius": { "type": "number", "description": "Radius in meters" },
+        "startTime": { "type": "string", "format": "date-time" },
+        "endTime": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "instructorId", "latitude", "longitude", "radius", "startTime", "endTime"]
+    },
+    "Attendance": {
+      "title": "Attendance",
+      "description": "A student's check-in for a lecture",
+      "type": "object",
+      "properties": {
+        "lectureId": { "type": "string" },
+        "studentId": { "type": "string" },
+        "studentName": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["present", "late"] },
+        "lat": { "type": "number" },
+        "lng": { "type": "number" }
+      },
+      "required": ["lectureId", "studentId", "timestamp", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/lectures/{lectureId}": {
+      "schema": "Lecture",
+      "description": "Lectures created by instructors"
+    },
+    "/lectures/{lectureId}/attendance/{studentId}": {
+      "schema": "Attendance",
+      "description": "Attendance records for a specific lecture"
+    }
+  }
+}
