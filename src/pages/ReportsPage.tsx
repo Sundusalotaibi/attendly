@@ -69,19 +69,46 @@ export default function ReportsPage() {
   const filteredAttendance = attendance.filter(att => 
     att.studentName.toLowerCase().includes(searchTerm.toLowerCase())
   );
+const handleExport = () => {
+  if (!attendance || attendance.length === 0) {
+    alert("No data to export");
+    return;
+  }
 
-  return (
-    <div className="space-y-8">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-           <h1 className="text-3xl font-black text-white tracking-tight">{t('nav.reports')}</h1>
-           <p className="text-text-dim text-sm">{t('reports.subtitle')}</p>
-        </div>
-        <button className="btn-immersive flex items-center justify-center gap-2">
-           <Download size={18} />
-           {t('reports.exportCSV')}
-        </button>
-      </header>
+  const rows = attendance.map(a =>
+    ${a.studentName},${a.status},${a.date}
+  );
+
+  const csvContent =
+    "data:text/csv;charset=utf-8," +
+    ["Name,Status,Date", ...rows].join("\n");
+
+  const encodedUri = encodeURI(csvContent);
+
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", "attendance.csv");
+  document.body.appendChild(link);
+  link.click();
+};
+
+return (
+  <div className="space-y-8">
+    <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h1 className="text-3xl font-black text-white tracking-tight">{t('nav.reports')}</h1>
+        <p className="text-text-dim text-sm">{t('reports.subtitle')}</p>
+      </div>
+
+      <button
+        onClick={handleExport}
+        className="btn-immersive flex items-center justify-center gap-2"
+      >
+        <Download size={18} />
+        {t('reports.exportCSV')}
+      </button>
+
+    </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
          {/* Filter Sidebar */}
