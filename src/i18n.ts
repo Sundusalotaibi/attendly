@@ -82,16 +82,18 @@ const resources = {
         absent: "Absent",
         confirmDelete: "Are you sure you want to delete this lecture?"
       },
-      nav: {
-        dashboard: "Dashboard",
-        lectures: "Lectures",
-        reports: "Reports",
-        settings: "Settings",
-        history: "Attendance History",
-        logout: "Logout"
-      }
-    }
-  },
+   nav: {
+  dashboard: "Dashboard",
+  lectures: "Lectures",
+  reports: "Reports",
+  settings: "Settings",
+  history: "Attendance History",
+  logout: "Logout"
+},
+
+reports: {
+  subtitle: "View attendance reports"
+},
   ar: {
     translation: {
       brand: "Attendly",
