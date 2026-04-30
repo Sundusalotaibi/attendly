@@ -93,6 +93,8 @@ const resources = {
 
 reports: {
   subtitle: "View attendance reports"
+}
+}
 },
   ar: {
     translation: {
