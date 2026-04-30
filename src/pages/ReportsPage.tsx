@@ -70,13 +70,12 @@ export default function ReportsPage() {
     att.studentName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 const handleExport = () => {
-  if (!attendance || attendance.length === 0) {
-    alert("No data to export");
+  if (!attendance || attendance.length === 0) { alert("No data to export");
     return;
   }
 
   const rows = attendance.map(a =>
-    ${a.studentName},${a.status},${a.date}
+    '${a.studentName},${a.status},${a.timestamp}'
   );
 
   const csvContent =
@@ -86,8 +85,8 @@ const handleExport = () => {
   const encodedUri = encodeURI(csvContent);
 
   const link = document.createElement("a");
-  link.setAttribute("href", encodedUri);
-  link.setAttribute("download", "attendance.csv");
+  link.href = encodedUri;
+  link.download = "attendance.csv";
   document.body.appendChild(link);
   link.click();
 };
