@@ -137,10 +137,32 @@ function InstructorDashboard({ lectures, attendance, loading }: { lectures: any[
 
   // Group attendance by day of week for the chart
   const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-  const chartData = weekDays.map(day => {
-    // This is a simplification. Real data would filter by actual date.
-    return { name: day, present: 0, absent: 0 };
+ function getDayName(date) {
+  return new Date(date).toLocaleDateString('en-US', {
+    weekday: 'short'
   });
+}
+
+const chartData = weekDays.map(day => {
+  const dayRecords = attendance.filter(r => {
+    const recordDay = getDayName(r.timestamp);
+    return recordDay === day;
+  });
+
+  const present = dayRecords.filter(r => 
+    r.status === 'present' || r.status === 'late'
+  ).length;
+
+  const absent = dayRecords.filter(r => 
+    r.status === 'absent'
+  ).length;
+
+  return {
+    name: day,
+    present,
+    absent
+  };
+});
 
   // Simple calculation for the dash in the center of pie chart
   const avgRate = attendance.length > 0 ? `${Math.round((presentCount / total) * 100)}%` : '0%';
