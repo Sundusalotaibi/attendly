@@ -1,58 +1,27 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    // ===============================================================
-    // Global Safety Net
-    // ===============================================================
     match /{document=**} {
-      allow read, write: if false;
-    }
-
-    // ===============================================================
-    // Shared Helper Functions
-    // ===============================================================
+      allow read, write: if false; }
     function isSignedIn() {
-      return request.auth != null;
-    }
-
+      return request.auth != null;}
     function isVerified() {
-      return isSignedIn() && (request.auth.token.email_verified == true || request.auth.token.firebase.sign_in_provider == 'google.com');
-    }
-
+      return isSignedIn() && (request.auth.token.email_verified == true || request.auth.token.firebase.sign_in_provider == 'google.com');}
     function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
-
+      return isSignedIn() && request.auth.uid == userId;}
     function isValidId(id) {
-      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
-    }
-
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');}
     function incoming() {
-      return request.resource.data;
-    }
-
+      return request.resource.data; }
     function existing() {
-      return resource.data;
-    }
-
+      return resource.data;}
     function isAdmin() {
-       return isVerified() && request.auth.token.email == "sondosalrwees1@gmail.com";
-    }
-
+       return isVerified() && request.auth.token.email == "sondosalrwees1@gmail.com"; }
     function getUserRole(uid) {
       let path = /databases/$(database)/documents/users/$(uid);
-      return exists(path) ? get(path).data.get('role', 'student') : 'student';
-    }
-
+      return exists(path) ? get(path).data.get('role', 'student') : 'student'; }
     function isInstructor() {
-      return isVerified() && getUserRole(request.auth.uid) == 'instructor';
-    }
-
-    // ===============================================================
-    // Entity Validations (Pillar 2)
-    // ===============================================================
-    
+      return isVerified() && getUserRole(request.auth.uid) == 'instructor';}
     function isValidUser(data) {
       return data.uid == request.auth.uid &&
              data.name is string && data.name.size() >= 2 && data.name.size() <= 100 &&
@@ -61,18 +30,14 @@ service cloud.firestore {
              (!('totalLectures' in data) || data.totalLectures is number) &&
              (!('presentCount' in data) || data.presentCount is number) &&
              (!('absentCount' in data) || data.absentCount is number) &&
-             (!('lateCount' in data) || data.lateCount is number);
-    }
-
+             (!('lateCount' in data) || data.lateCount is number);  }
     function isValidLecture(data) {
       return data.instructorId == request.auth.uid &&
              data.name is string && data.name.size() > 0 && data.name.size() <= 200 &&
              data.latitude is number && data.longitude is number &&
              data.radius is number && data.radius >= 10 && data.radius <= 1000 &&
              data.startTime is string && data.endTime is string &&
-             data.createdAt is string;
-    }
-
+             data.createdAt is string; }
     function isValidAttendance(data) {
       return data.studentId == request.auth.uid &&
              data.lectureId is string &&
@@ -80,61 +45,40 @@ service cloud.firestore {
              data.studentName is string &&
              data.status in ['present', 'late'] &&
              data.timestamp is string &&
-             data.lat is number && data.lng is number;
-    }
+             data.lat is number && data.lng is number; }
 
-    // ===============================================================
-    // Rules (Pillar 1, 3, 6, 8)
-    // ===============================================================
-
-    // Support collection group queries for student attendance history
     match /{path=**}/attendance/{atStudentId} {
       allow read: if isSignedIn() && (
         request.auth.uid == atStudentId || 
         (resource != null && resource.data.studentId == request.auth.uid) || 
-        isAdmin()
-      );
-    }
+        isAdmin()); }
 
     match /users/{userId} {
-      // Prioritize owner access to prevent listener errors during sign-up
       allow get: if isSignedIn() && request.auth.uid == userId;
-      
-      // Allow instructors and admins to see other profiles
       allow get: if isInstructor() || isAdmin();
-      
       allow list: if isSignedIn() && (isOwner(userId) || isAdmin());
-      
       allow create: if isOwner(userId) && isValidUser(incoming()) && 
                     incoming().keys().hasAll(['uid', 'name', 'role']) && 
-                    incoming().keys().size() >= 3;
-                    
+                    incoming().keys().size() >= 3;         
       allow update: if (isOwner(userId) && isValidUser(incoming()) && incoming().role == existing().role) ||
-                    isAdmin();
-    }
+                    isAdmin(); }
 
     match /lectures/{lectureId} {
       allow get: if isSignedIn() && isValidId(lectureId);
       allow list: if isSignedIn(); 
-      
       allow create: if isVerified() && getUserRole(request.auth.uid) == 'instructor' && isValidLecture(incoming());
-      
       allow update: if isVerified() && (
         (getUserRole(request.auth.uid) == 'instructor' && existing().instructorId == request.auth.uid && isValidLecture(incoming())) ||
-        isAdmin()
-      );
-      
+        isAdmin() );
       allow delete: if isVerified() && (
         (getUserRole(request.auth.uid) == 'instructor' && existing().instructorId == request.auth.uid) ||
-        isAdmin()
-      );
+        isAdmin() );
 
       match /attendance/{studentId} {
         allow read: if isSignedIn() && (
           isOwner(studentId) || 
           (get(/databases/$(database)/documents/lectures/$(lectureId)).data.instructorId == request.auth.uid) ||
-          isAdmin()
-        );
+          isAdmin() );
         
         allow create: if isSignedIn() && isOwner(studentId) && 
                       isValidAttendance(incoming()) &&
