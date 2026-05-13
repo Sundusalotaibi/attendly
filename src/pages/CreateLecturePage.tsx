@@ -47,8 +47,6 @@ export default function CreateLecturePage() {
     try {
       const startTime = new Date(`${formData.date}T${formData.time}`).toISOString();
       const endTime = new Date(new Date(startTime).getTime() + formData.duration * 60000).toISOString();
-      
-      // Generate a unique short code for manual entry
       const lectureCode = Math.random().toString(36).substring(2, 8).toUpperCase();
       
       const lectureData = {
