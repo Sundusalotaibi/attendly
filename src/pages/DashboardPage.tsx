@@ -55,7 +55,6 @@ export default function DashboardPage() {
         orderBy('createdAt', 'desc')
       );
 
-      // Fetch all attendance records for this instructor's lectures
       const attendanceQ = query(
         collectionGroup(db, 'attendance'),
         where('instructorId', '==', profile.uid)
@@ -69,7 +68,6 @@ export default function DashboardPage() {
         orderBy('createdAt', 'desc')
       );
 
-      // Fetch history/attendance for students
       const historyQ = query(
         collectionGroup(db, 'attendance'),
         where('studentId', '==', profile.uid),
@@ -110,7 +108,6 @@ function InstructorDashboard({ lectures, attendance, loading }: { lectures: any[
   const lateCount = attendance.filter(r => r.status === 'late').length;
   const totalAttendance = attendance.length;
   
-  // Real stats calculation
   const stats = [
     { label: 'dashboard.stats.totalLectures', value: lectures.length, icon: Calendar, color: 'emerald' },
     { label: 'dashboard.stats.present', value: presentCount, icon: Users, color: 'blue' },
@@ -135,7 +132,6 @@ function InstructorDashboard({ lectures, attendance, loading }: { lectures: any[
     { name: 'Absent', value: 0, fill: '#ef4444' },
   ];
 
-  // Group attendance by day of week for the chart
   const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
  function getDayName(date) {
   return new Date(date).toLocaleDateString('en-US', {
@@ -164,7 +160,6 @@ const chartData = weekDays.map(day => {
   };
 });
 
-  // Simple calculation for the dash in the center of pie chart
   const avgRate = attendance.length > 0 ? `${Math.round((presentCount / total) * 100)}%` : '0%';
 
   return (
