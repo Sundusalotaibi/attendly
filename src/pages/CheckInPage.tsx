@@ -77,7 +77,6 @@ export default function CheckInPage() {
           }
         };
 
-        // Strategy to strictly use back camera
         try {
           // 1. Try environment facing mode (standard)
           await html5QrCode.start(
@@ -147,7 +146,7 @@ export default function CheckInPage() {
     setErrorMsg('');
 
     try {
-      // 1. Resolve Lecture (by ID or Code)
+      
       let lecture: any = null;
       let finalLectureId = lectureId;
 
@@ -175,15 +174,13 @@ export default function CheckInPage() {
       const now = new Date();
       const endTime = new Date(lecture.endTime);
 
-      // 2. Verify Time
       if (now > endTime) {
         setStatus('error');
         setErrorMsg(t('checkin.errorTime'));
         setLoading(false);
         return;
       }
-
-      // 3. Get Student Location
+      
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
           enableHighAccuracy: true,
@@ -204,7 +201,6 @@ export default function CheckInPage() {
       );
       setDistance(Math.round(dist));
 
-      // 4. Verify Distance (Allow for a small 10m buffer to account for GPS inaccuracy)
       if (dist > (lectureRadius + 10)) {
         setStatus('error');
         setErrorMsg(t('checkin.errorLocation'));
@@ -212,7 +208,6 @@ export default function CheckInPage() {
         return;
       }
 
-      // 5. Verify Duplicate
       const attPath = `lectures/${finalLectureId}/attendance/${profile.uid}`;
       const attRef = doc(db, attPath);
       const attSnap = await getDoc(attRef);
@@ -223,7 +218,6 @@ export default function CheckInPage() {
         return;
       }
 
-      // 6. Record Attendance
       const isLate = now > new Date(new Date(lecture.startTime).getTime() + 5 * 60000); // Late if > 5m after start
       const attendanceStatus = isLate ? 'late' : 'present';
 
@@ -239,7 +233,6 @@ export default function CheckInPage() {
         lng: position.coords.longitude
       });
 
-      // 7. Update Student Stats (Atomic)
       const userRef = doc(db, 'users', profile.uid);
       await updateDoc(userRef, {
         totalLectures: increment(1),
