@@ -303,12 +303,34 @@ function StudentDashboard({ lectures, attendance, history, loading }: { lectures
     { label: 'dashboard.stats.rate', value: `${totalAttendance > 0 ? Math.round((presentCount / totalAttendance) * 100) : 0}%`, icon: ArrowUpRight, color: 'purple' },
   ];
 
-  const trendData = [
-    { name: 'Week 1', rate: 100 },
-    { name: 'Week 2', rate: 80 },
-    { name: 'Week 3', rate: 90 },
-    { name: 'Week 4', rate: 85 },
-  ];
+  const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+
+function getDayName(date: string) {
+  return new Date(date).toLocaleDateString('en-US', {
+    weekday: 'short',
+  });
+}
+
+const trendData = weekDays.map(day => {
+  const dayAttendance = attendance.filter((r: any) => {
+    const recordDay = getDayName(r.timestamp);
+    return recordDay === day;
+  });
+
+  const present = dayAttendance.filter(
+    (r: any) =>
+      r.status === 'present' || r.status === 'late'
+  ).length;
+
+  const total = dayAttendance.length;
+
+  return {
+    name: day,
+    rate: total > 0
+      ? Math.round((present / total) * 100)
+      : 0,
+  };
+});
 
   return (
     <div className="space-y-8">
